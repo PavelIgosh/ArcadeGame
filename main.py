@@ -35,7 +35,8 @@ hero = {
     },
     "Armor": 25,
     "Model": "🐵",
-    "base_damage": 40,
+    "Death": "💀",
+    "base_damage": 20,
     "Luck": random.randint(0, 3),
     "Positon":[0, 0]
 }
@@ -52,7 +53,7 @@ enemy = {
     },
     "Armor": 10,
     "Model": "🍌",
-    "base_damage": 25,
+    "base_damage": 5,
     "Position":[]
 }
 
@@ -118,103 +119,114 @@ while counter_hero != 1 and counter_enemies != 3:
 
 
 while True:
-    
+  print(enemy["Position"])
   for i in map:
     print("\n")
     for j in i:
-      print("".join(str(j)), end="\t")
+      print("".join(str(j)), end="\t") 
   
   #Позиционириование    
 
 
-  
-  move = int(input("\n\nВыберите дейстиве\n1) Сходить налево\n2) Сходить направо\n3) Сходить вниз\n4) Сходить вверх\n--> "))
-  if move == 1:
-    temp = hero["Position"]
-    if temp[1] > 0:
-      map[temp[0]][temp[1]] = 0
-      map[temp[0]][temp[1]-1] = hero["Model"]
-      hero["Position"] = [temp[0],temp[1]-1]
-  elif move == 2:
-    temp = hero["Position"]
-    if temp[1] < 4:
-      map[temp[0]][temp[1]] = 0
-      map[temp[0]][temp[1]+1] = hero["Model"]
-      hero["Position"] = [temp[0],temp[1]+1]
-  elif move == 3:
-    temp = hero["Position"]
-    if temp[0] < 4:
-      map[temp[0]][temp[1]] = 0
-      map[temp[0] + 1][temp[1]] = hero["Model"]
-      hero["Position"] = [temp[0]+1,temp[1]]
-  elif move == 4:
-    temp = hero["Position"]
-    if temp[0] > 0:
-      map[temp[0]][temp[1]] = 0
-      map[temp[0] -1][temp[1]] = hero["Model"]
-      hero["Position"] = [temp[0]-1,temp[1]]
-  # if (hero["Position"][0] - 1 in enemy["Position"]) or (hero["Position"][0] + 1 in enemy["Position"]) or (hero["Position"][1] - 1 in enemy["Position"]) or (hero["Position"][1] + 1 in enemy["Position"]):
-  for p in range(len(enemy["Position"])):
-    x = hero["Position"][1]
-    y = hero["Position"][0]
-    a = enemy["Position"][p][1]
-    b = enemy["Position"][p][0]
-    
-    if ((a - x == -1) or (a - x == 0) or (a-x == 1)) and \
-      ((b - y == -1) or (b - y == 0) or (b - y == 1)):
+  hero_x = hero["Position"][1]
+  hero_y = hero["Position"][0]
+  for enemy_pos in enemy["Position"]:
+    enemy_x = enemy_pos[1]
+    enemy_y = enemy_pos[0]
+    if (enemy_x == hero_x and abs(enemy_y - hero_y) == 1) or \
+       (enemy_y == hero_y and abs(enemy_x - hero_x) == 1):
       while True:
-        print("БАНАНЫ АТАКУЮТ 😲")
+        print("\nБАНАНЫ АТАКУЮТ 😲")
         if random.randint(1, 6) in [6, 1, 2]:
           print("Удача на вашей стороне!")
           HEALTH_ENEMY -= DAMAGE_HERO
           enemy["Health"] = HEALTH_ENEMY
           print("Вы нанесли врагу", DAMAGE_HERO, "урона")
+          print(f"У врага осталось {HEALTH_ENEMY} здоровья")
           if enemy["Health"] <= 50:
             if "Health_Flask" in enemy["Inventory"]:
               print("Враг использовал зелье!")
               HEALTH_ENEMY += enemy["Inventory"]["Health_Flask"]
               del enemy["Inventory"]["Health_Flask"]
               print("У врага осталось", enemy["Inventory"])
-              print(f"У врага осталось {HEALTH_BAR_ENEMY} здоровья")
+              print(f"У врага осталось {HEALTH_ENEMY} здоровья")
             else:
               print("У врага нет зелья!")
           if enemy["Health"] <= 0:
             print("Враг повержен")
+            index = enemy["Position"].index([enemy_y, enemy_x])
+            enemy["Position"].pop(index)
+            temp = [enemy_y, enemy_x]
+            map[temp[0]][temp[1]] = 0
+            for i in map:
+              print("\n")
+              for j in i:
+                print("".join(str(j)), end="\t") 
             break
           else:
             print("У врага", enemy["Health"], "здоровья")
           enemy["Armor"] = enemy["Armor"] - enemy["Armor"] * 0.25
           print("У врага", enemy["Armor"], "брони")
-          if enemy["Health"] <= 0:
-            print("Враг повержен!")
-            break
         else:
           print("Удача не на вашей стороне!")
           HEALTH_HERO -= DAMAGE_ENEMY
           hero["Health"] = HEALTH_HERO
           print("Вам нанесли", DAMAGE_ENEMY, "урона")
-          if hero["Health"] <= 50:
-            print("У вас мало здоровья! Желаете использовать зелье?")
-            s = input("(y/n): ")
-            if s == "y":
-              if "Health_Flask" in hero["Inventory"]:
+          print(f"У вас осталось {HEALTH_HERO} здоровья")
+          if hero["Health"] <= 0:
+            print("GAME OVER!")
+            temp = hero["Position"]
+            map[temp[0]][temp[1]] = hero["Death"]
+            for i in map:
+              print("\n")
+              for j in i:
+                print("".join(str(j)), end="\t") 
+            exit()
+          elif hero["Health"] <= 50:
+            if "Health_Flask" in hero["Inventory"]:
+              print("Желаете использовать зелье?")
+              s = input("(y/n): ")
+              if s == "y":
                 print("Вы использовали зелье!")
                 HEALTH_HERO += hero["Inventory"]["Health_Flask"]
                 del hero["Inventory"]["Health_Flask"]
                 print("У вас осталось", hero["Inventory"])
-                print(f"У вас осталось {HEALTH_BAR_HERO} здоровья")
-              else:
-                print("У вас нет зелья")
+                print(f"У вас осталось {HEALTH_HERO} здоровья")
+              elif s == "n":
+                print("Вы решили не использовать зелье")
             else:
-              print("Вы решили не использовать зелье")
-          elif hero["Health"] <= 0:
-            print("GAME OVER!")
-            break
+              print("У вас нет зелья")
           else:
-            print("У Вас", hero["Health"], "здоровья")
-          hero["Armor"] = hero["Armor"] - hero["Armor"] * 0.25
-          print("У Вас", hero["Armor"], "брони")
+            hero["Armor"] = hero["Armor"] - hero["Armor"] * 0.25
+            print("У Вас", hero["Armor"], "брони")
           
+  
+  move = input("\n\nВыберите дейстиве\nW) Сходить вверх\nA) Сходить налево\nS) Сходить вниз\nD) Сходить направо\n--> ").lower()
+  if move == "a":
+    temp = hero["Position"]
+    if temp[1] > 0:
+      map[temp[0]][temp[1]] = 0
+      map[temp[0]][temp[1]-1] = hero["Model"]
+      hero["Position"] = [temp[0],temp[1]-1]
+  elif move == "d":
+    temp = hero["Position"]
+    if temp[1] < 4:
+      map[temp[0]][temp[1]] = 0
+      map[temp[0]][temp[1]+1] = hero["Model"]
+      hero["Position"] = [temp[0],temp[1]+1]
+  elif move == "s":
+    temp = hero["Position"]
+    if temp[0] < 4:
+      map[temp[0]][temp[1]] = 0
+      map[temp[0] + 1][temp[1]] = hero["Model"]
+      hero["Position"] = [temp[0]+1,temp[1]]
+  elif move == "w":
+    temp = hero["Position"]
+    if temp[0] > 0:
+      map[temp[0]][temp[1]] = 0
+      map[temp[0] -1][temp[1]] = hero["Model"]
+      hero["Position"] = [temp[0]-1,temp[1]]
+  # if (hero["Position"][0] - 1 in enemy["Position"]) or (hero["Position"][0] + 1 in enemy["Position"]) or (hero["Position"][1] - 1 in enemy["Position"]) or (hero["Position"][1] + 1 in enemy["Position"]):
     
 
 # Если гг стоит так, что рядом с вами враг, начинается бой
